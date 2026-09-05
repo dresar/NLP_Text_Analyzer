@@ -1,0 +1,15 @@
+{
+  "name": "nlp-analyzer",
+  "version": "1.0.0",
+  "description": "NLP Text Analysis Web Application",
+  "scripts": {
+    "build": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/main.css",
+    "watch": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/main.css --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21"
+  }
+}

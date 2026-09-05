@@ -1,0 +1,10 @@
+Django==4.2.23
+spacy==3.7.2
+nltk==3.8.1
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
+Pillow==10.1.0
+django-crispy-forms==2.1.0
+django-tailwind==3.6.0
+python-dotenv==1.0.0
+gunicorn==21.2.0
+mysqlclient==2.2.0

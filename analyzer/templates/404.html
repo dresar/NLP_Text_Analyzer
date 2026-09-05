@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}404 - Halaman Tidak Ditemukan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-galaxy-dark py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-10 rounded-xl shadow-lg transform transition-all">
+        <div class="text-center">
+            <h1 class="text-9xl font-bold text-primary-600 dark:text-primary-400">404</h1>
+            <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+                Halaman Tidak Ditemukan
+            </h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                Maaf, halaman yang Anda cari tidak dapat ditemukan.
+            </p>
+            <div class="mt-8 space-y-4">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                            Mungkin Anda ingin mencoba
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-4">
+                    <a href="{% url 'home' %}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Kembali ke Beranda
+                    </a>
+                    <a href="{% url 'about' %}" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Tentang Aplikasi
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8 text-center">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                        Atau
+                    </span>
+                </div>
+            </div>
+            <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+                Jika Anda yakin halaman ini seharusnya ada, silakan hubungi administrator.
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center">
+            <div class="text-center text-sm text-gray-500 dark:text-gray-400">
+                <p>© {% now "Y" %} NLP Text Analyzer. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Animasi bintang-bintang untuk tema gelap -->
+<div class="dark:block hidden">
+    <div class="stars absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
+        <div class="star absolute rounded-full bg-white animate-twinkle" style="width: {{ forloop.counter|divisibleby:3|yesno:'2px,1px,3px' }}; height: {{ forloop.counter|divisibleby:3|yesno:'2px,1px,3px' }}; top: {{ forloop.counter0|add:1|multiply:5 }}%; left: {{ forloop.counter|multiply:5 }}%; animation-delay: {{ forloop.counter0|multiply:0.3 }}s;"></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}NLP Text Analyzer - Beranda{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+    <div class="p-4 {% if message.tags == 'success' %}bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-200{% elif message.tags == 'error' %}bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-200{% else %}bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-200{% endif %} rounded-md">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="bg-white dark:bg-galaxy-dark shadow-md rounded-lg overflow-hidden max-w-4xl mx-auto">
+    <div class="p-6 md:p-8">
+        <!-- Penjelasan Aplikasi -->
+        <div class="mb-8 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-100 dark:border-primary-800">
+            <h2 class="text-xl font-bold text-primary-800 dark:text-primary-300 mb-3">Tentang NLP Text Analyzer</h2>
+            <p class="text-gray-700 dark:text-gray-300 mb-3">Selamat datang di aplikasi NLP Text Analyzer! Aplikasi ini dirancang untuk membantu Anda menganalisis teks menggunakan teknologi Natural Language Processing (NLP) dengan berbagai fitur canggih:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-white dark:bg-galaxy-darker p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-semibold text-primary-700 dark:text-primary-400">Analisis Sentimen</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Mendeteksi sentimen positif, negatif, atau netral dari teks yang Anda masukkan dengan skor kepercayaan.</p>
+                </div>
+                
+                <div class="bg-white dark:bg-galaxy-darker p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-semibold text-primary-700 dark:text-primary-400">Ringkasan Teks</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Membuat ringkasan otomatis dari teks panjang dengan mempertahankan informasi penting.</p>
+                </div>
+                
+                <div class="bg-white dark:bg-galaxy-darker p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-semibold text-primary-700 dark:text-primary-400">Pengenalan Entitas</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Mengidentifikasi nama orang, lokasi, organisasi, dan entitas lainnya dalam teks Anda.</p>
+                </div>
+                
+                <div class="bg-white dark:bg-galaxy-darker p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-semibold text-primary-700 dark:text-primary-400">Klasifikasi Teks</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Mengkategorikan teks Anda ke dalam berbagai kategori dengan tingkat kepercayaan.</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-gray-700 dark:text-gray-300">
+                <p>Pengguna terdaftar dapat menyimpan analisis dan membuat template untuk digunakan kembali. Mulai analisis sekarang!</p>
+            </div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-gradient">NLP Text Analyzer</h1>
+            {% if user.is_authenticated %}
+            <div class="flex space-x-2">
+                <button type="button" onclick="openSaveTemplateModal()" class="px-4 py-2 bg-secondary-600 text-white font-medium rounded-md shadow-sm hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-colors dark:bg-secondary-700 dark:hover:bg-secondary-600">
+                    Simpan Template
+                </button>
+                <a href="{% url 'dashboard' %}" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors dark:bg-primary-700 dark:hover:bg-primary-600">
+                    Dasbor Saya
+                </a>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors dark:bg-primary-700 dark:hover:bg-primary-600">
+                Masuk untuk Menyimpan
+            </a>
+            {% endif %}
+        </div>
+        
+        <form method="post" class="space-y-6" id="analysis-form">
+            {% csrf_token %}
+            
+            {% if user.is_authenticated and templates %}
+            <div>
+                <label for="template" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muat Template</label>
+                <div class="flex space-x-2">
+                    <select id="template" class="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-galaxy-darker dark:text-gray-200">
+                        <option value="">Pilih template</option>
+                        {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="loadTemplate()" class="px-4 py-2 bg-gray-600 text-white font-medium rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors dark:bg-gray-700 dark:hover:bg-gray-600">
+                        Muat
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label for="analysis_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jenis Analisis</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                        <input type="radio" id="sentiment" name="analysis_type" value="sentiment" {% if not analysis_type or analysis_type == 'sentiment' %}checked{% endif %} class="hidden peer">
+                        <label for="sentiment" class="flex items-center justify-center p-3 text-gray-500 dark:text-gray-300 bg-white dark:bg-galaxy-darker border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 hover:bg-gray-50 dark:hover:bg-galaxy-dark">
+                            <span class="w-full text-center font-medium">Analisis Sentimen</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="summary" name="analysis_type" value="summary" {% if analysis_type == 'summary' %}checked{% endif %} class="hidden peer">
+                        <label for="summary" class="flex items-center justify-center p-3 text-gray-500 dark:text-gray-300 bg-white dark:bg-galaxy-darker border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 hover:bg-gray-50 dark:hover:bg-galaxy-dark">
+                            <span class="w-full text-center font-medium">Ringkasan Teks</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="ner" name="analysis_type" value="ner" {% if analysis_type == 'ner' %}checked{% endif %} class="hidden peer">
+                        <label for="ner" class="flex items-center justify-center p-3 text-gray-500 dark:text-gray-300 bg-white dark:bg-galaxy-darker border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 hover:bg-gray-50 dark:hover:bg-galaxy-dark">
+                            <span class="w-full text-center font-medium">Pengenalan Entitas</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="classification" name="analysis_type" value="classification" {% if analysis_type == 'classification' %}checked{% endif %} class="hidden peer">
+                        <label for="classification" class="flex items-center justify-center p-3 text-gray-500 dark:text-gray-300 bg-white dark:bg-galaxy-darker border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 hover:bg-gray-50 dark:hover:bg-galaxy-dark">
+                            <span class="w-full text-center font-medium">Klasifikasi Teks</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <label for="text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Masukkan teks Anda</label>
+                <textarea id="text" name="text" rows="6" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-galaxy-darker dark:text-gray-200" placeholder="Masukkan teks untuk dianalisis...">{{ text|default:'' }}</textarea>
+            </div>
+            
+            {% if user.is_authenticated %}
+            <div class="flex items-center">
+                <input id="save_analysis" name="save_analysis" type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded dark:bg-galaxy-darker">
+                <label for="save_analysis" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Simpan analisis ini</label>
+            </div>
+            
+            <div id="save-options" class="space-y-4 hidden">
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul</label>
+                    <input type="text" name="title" id="title" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-galaxy-darker dark:text-gray-200" placeholder="Judul Analisis">
+                </div>
+                
+                <div>
+                    <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tag (dipisahkan koma)</label>
+                    <input type="text" name="tags" id="tags" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-galaxy-darker dark:text-gray-200" placeholder="tag1, tag2, tag3">
+                </div>
+            </div>
+            {% endif %}
+            
+            <div>
+                <button type="submit" class="w-full md:w-auto px-6 py-3 bg-primary-600 text-white font-medium rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors dark:bg-primary-700 dark:hover:bg-primary-600">
+                    Analisis Teks
+                </button>
+            </div>
+        </form>
+        
+        {% if result %}
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Hasil Analisis</h2>
+            
+            {% if analysis_type == 'sentiment' %}
+            <div class="bg-gray-50 dark:bg-galaxy-darker p-4 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Sentimen: 
+                            <span class="{% if result.color_class == 'green' %}text-green-600 dark:text-green-400{% elif result.color_class == 'red' %}text-red-600 dark:text-red-400{% else %}text-yellow-600 dark:text-yellow-400{% endif %} font-semibold">
+                                {% if result.sentiment == 'positive' %}Positif{% elif result.sentiment == 'negative' %}Negatif{% else %}Netral{% endif %}
+                            </span>
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Skor gabungan: {{ result.compound|floatformat:2 }}</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex-shrink-0">
+                        <div class="inline-flex items-center px-4 py-2 rounded-full {% if result.color_class == 'green' %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300{% elif result.color_class == 'red' %}bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300{% else %}bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300{% endif %}">
+                            <span class="text-sm font-medium">{% if result.sentiment == 'positive' %}Positif{% elif result.sentiment == 'negative' %}Negatif{% else %}Netral{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Positif</div>
+                        <div class="text-xl font-semibold text-gray-900 dark:text-white mt-1">{{ result.positive|floatformat:2 }}</div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                            <div class="bg-green-500 dark:bg-green-400 h-2.5 rounded-full" style="width: {{ result.positive|floatformat:2|multiply:100 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Netral</div>
+                        <div class="text-xl font-semibold text-gray-900 dark:text-white mt-1">{{ result.neutral|floatformat:2 }}</div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                            <div class="bg-yellow-500 dark:bg-yellow-400 h-2.5 rounded-full" style="width: {{ result.neutral|floatformat:2|multiply:100 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Negatif</div>
+                        <div class="text-xl font-semibold text-gray-900 dark:text-white mt-1">{{ result.negative|floatformat:2 }}</div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                            <div class="bg-red-500 dark:bg-red-400 h-2.5 rounded-full" style="width: {{ result.negative|floatformat:2|multiply:100 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if analysis_type == 'summary' %}
+            <div class="bg-gray-50 dark:bg-galaxy-darker p-4 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Ringkasan Teks</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dikurangi sebesar {{ result.reduction }}% (dari {{ result.original_length }} menjadi {{ result.summary_length }} karakter)</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-galaxy-dark p-4 rounded border border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-800 dark:text-gray-200">{{ result.summary }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if analysis_type == 'ner' %}
+            <div class="bg-gray-50 dark:bg-galaxy-darker p-4 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Pengenalan Entitas</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ditemukan {{ result.entity_count }} entitas dalam teks</p>
+                    </div>
+                </div>
+                
+                {% if result.entities %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-galaxy-dark">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entitas</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipe</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Deskripsi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-galaxy-dark divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for entity in result.entities %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ entity.text }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ entity.label }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ entity.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-3">Entitas berdasarkan Tipe</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for label, entities in result.entity_groups.items %}
+                        <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ label }}</div>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for entity in entities %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300">
+                                    {{ entity }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-white dark:bg-galaxy-dark p-4 rounded border border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-800 dark:text-gray-200">Tidak ada entitas yang ditemukan dalam teks.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if analysis_type == 'classification' %}
+            <div class="bg-gray-50 dark:bg-galaxy-darker p-4 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Klasifikasi Teks</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kategori yang diprediksi berdasarkan konten teks</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex-shrink-0">
+                        <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-900/20 text-primary-800 dark:text-primary-300">
+                            <span class="text-sm font-medium">{{ result.category|title }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if result.confidence > 0 %}
+                <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Tingkat Kepercayaan</div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ result.confidence }}%</div>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                        <div class="bg-primary-500 dark:bg-primary-400 h-2.5 rounded-full" style="width: {{ result.confidence }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-md font-medium text-gray-900 dark:text-white mb-3">Skor Kategori</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for category, score in result.all_categories.items %}
+                        <div class="bg-white dark:bg-galaxy-dark p-3 rounded border border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ category|title }}</div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ score }}</div>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                                <div class="{% if category == result.category %}bg-primary-500 dark:bg-primary-400{% else %}bg-gray-400 dark:bg-gray-500{% endif %} h-2.5 rounded-full" style="width: {% if result.all_categories.values|sum_values > 0 %}{{ score|divide:result.all_categories.values|sum_values|multiply:100 }}{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-white dark:bg-galaxy-dark p-4 rounded border border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-800 dark:text-gray-200">Tidak dapat menentukan kategori spesifik untuk teks ini. Sepertinya ini adalah konten umum.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if public_analyses %}
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Analisis Publik Terbaru</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for analysis in public_analyses %}
+                <div class="bg-white dark:bg-galaxy-dark p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow card-hover">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">{{ analysis.title }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ analysis.created_at|date:"d M Y" }} • {{ analysis.get_analysis_type_display }}</p>
+                    <p class="text-gray-700 dark:text-gray-300 mt-2 line-clamp-2">{{ analysis.text|truncatechars:100 }}</p>
+                    <div class="mt-4">
+                        <a href="{% url 'analysis_detail' analysis.id %}" class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium">Lihat Analisis →</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Save Template Modal -->
+{% if user.is_authenticated %}
+<div id="save-template-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-80 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-galaxy-darker rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Simpan sebagai Template</h3>
+                <button type="button" onclick="closeSaveTemplateModal()" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form method="post" action="{% url 'save_template' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="text" id="template-text">
+                <input type="hidden" name="analysis_type" id="template-analysis-type">
+                
+                <div>
+                    <label for="template-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Template</label>
+                    <input type="text" name="name" id="template-name" required class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-galaxy-dark dark:text-gray-200">
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeSaveTemplateModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 dark:bg-primary-700 text-white font-medium rounded-md shadow-sm hover:bg-primary-700 dark:hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                        Simpan Template
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-resize textarea as user types
+        const textarea = document.getElementById('text');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        }
+        
+        // Toggle save options when checkbox is clicked
+        const saveCheckbox = document.getElementById('save_analysis');
+        const saveOptions = document.getElementById('save-options');
+        
+        if (saveCheckbox && saveOptions) {
+            saveCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    saveOptions.classList.remove('hidden');
+                } else {
+                    saveOptions.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Ensure dark mode is applied on page load if it's set in localStorage
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+    
+    // Template functions
+    function openSaveTemplateModal() {
+        const text = document.getElementById('text').value;
+        if (!text) {
+            alert('Silakan masukkan teks sebelum menyimpan sebagai template.');
+            return;
+        }
+        
+        const modal = document.getElementById('save-template-modal');
+        const templateText = document.getElementById('template-text');
+        const templateAnalysisType = document.getElementById('template-analysis-type');
+        
+        // Get selected analysis type
+        const analysisTypeRadios = document.getElementsByName('analysis_type');
+        let selectedAnalysisType = 'sentiment';
+        
+        for (const radio of analysisTypeRadios) {
+            if (radio.checked) {
+                selectedAnalysisType = radio.value;
+                break;
+            }
+        }
+        
+        templateText.value = text;
+        templateAnalysisType.value = selectedAnalysisType;
+        
+        modal.classList.remove('hidden');
+    }
+    
+    function closeSaveTemplateModal() {
+        const modal = document.getElementById('save-template-modal');
+        modal.classList.add('hidden');
+    }
+    
+    function loadTemplate() {
+        const templateSelect = document.getElementById('template');
+        const templateId = templateSelect.value;
+        
+        if (!templateId) return;
+        
+        fetch(`{% url 'get_template' 0 %}`.replace('0', templateId))
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('text').value = data.text;
+                
+                // Set the correct radio button
+                const radioButton = document.getElementById(data.analysis_type);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            })
+            .catch(error => console.error('Error saat memuat template:', error));
+    }
+</script>
+{% endblock %}
